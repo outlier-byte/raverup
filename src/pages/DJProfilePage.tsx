@@ -234,7 +234,10 @@ export default function DJProfilePage() {
                     fontFamily: 'Space Grotesk, sans-serif',
                     letterSpacing: '-0.01em',
                   }}
-                  onClick={() => navigate(`/booking/${profile.id}`)}
+                  onClick={() => {
+                    console.log('dj id:', profile?.id)
+                    navigate(`/booking/${profile?.id}`)
+                  }}
                 >
                   Teklif Gönder
                 </button>
