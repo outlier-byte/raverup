@@ -185,20 +185,23 @@ export default function DJProfilePage() {
 
                 {profile.genre && (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 600,
-                        color: '#FF2D78',
-                        border: '1px solid #FF2D78',
-                        borderRadius: 4,
-                        padding: '3px 8px',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                      }}
-                    >
-                      {profile.genre}
-                    </span>
+                    {profile.genre.split(',').map((g) => (
+                      <span
+                        key={g.trim()}
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          color: '#FF2D78',
+                          border: '1px solid #FF2D78',
+                          borderRadius: 4,
+                          padding: '3px 8px',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
+                        }}
+                      >
+                        {g.trim()}
+                      </span>
+                    ))}
                   </div>
                 )}
 
