@@ -125,14 +125,14 @@ export default function BookingPage() {
         return
       }
 
-      if (!venueRes.data) {
-        setInitError('Bu sayfaya sadece venue hesapları erişebilir.')
-        setInitLoading(false)
-        return
-      }
+      // if (!venueRes.data) {
+      //   setInitError('Bu sayfaya sadece venue hesapları erişebilir.')
+      //   setInitLoading(false)
+      //   return
+      // }
 
       setDjName(djRes.data.name)
-      setVenueId(venueRes.data.id)
+      setVenueId(venueRes.data?.id ?? null)
       setInitLoading(false)
     }
 
