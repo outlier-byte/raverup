@@ -35,10 +35,18 @@ export default function DashboardPage() {
     if (!user) return
 
     async function fetchProfile() {
+      const { data: { session } } = await supabase.auth.getSession()
+      console.log('dashboard session:', session?.user?.id)
+
+      if (!session) {
+        setLoading(false)
+        return
+      }
+
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('type')
-        .eq('id', user!.id)
+        .eq('id', session.user.id)
         .maybeSingle()
 
       console.log('dashboard profile data:', profile)
@@ -58,7 +66,7 @@ export default function DashboardPage() {
         const { data, error: djError } = await supabase
           .from('dj_profiles')
           .select('stage_name, city')
-          .eq('user_id', user!.id)
+          .eq('user_id', session.user.id)
           .single()
 
         if (djError) setError(djError.message)
@@ -67,7 +75,7 @@ export default function DashboardPage() {
         const { data, error: venueError } = await supabase
           .from('venue_profiles')
           .select('name, city, capacity')
-          .eq('user_id', user!.id)
+          .eq('user_id', session.user.id)
           .single()
 
         if (venueError) setError(venueError.message)
