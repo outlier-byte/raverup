@@ -7,20 +7,18 @@ interface DJCard {
   id: string
   name: string
   city: string
-  genres: string[]
+  genre: string[]
   bpm_min: number | null
   bpm_max: number | null
   booking_count: number | null
-  photo_url: string | null
 }
 
 interface VenueCard {
   id: string
-  venue_name: string
+  name: string
   city: string
   capacity: number | null
-  genres: string[]
-  photo_url: string | null
+  preferred_genres: string[]
 }
 
 const ALL_GENRES = [
@@ -79,15 +77,7 @@ function DJCardView({ dj }: { dj: DJCard }) {
       onClick={() => navigate(`/dj/${dj.id}`)}
     >
       <div className="h-48 overflow-hidden flex-shrink-0">
-        {dj.photo_url ? (
-          <img
-            src={dj.photo_url}
-            alt={dj.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <PhotoPlaceholder name={dj.name} />
-        )}
+        <PhotoPlaceholder name={dj.name} />
       </div>
 
       <div className="p-4 flex flex-col gap-2 flex-1">
@@ -105,9 +95,9 @@ function DJCardView({ dj }: { dj: DJCard }) {
           </div>
         )}
 
-        {dj.genres?.length > 0 && (
+        {dj.genre?.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {dj.genres.slice(0, 3).map((g) => (
+            {dj.genre.slice(0, 3).map((g) => (
               <span
                 key={g}
                 className="text-xs px-2 py-0.5 rounded-full border text-[#FF2D78]"
@@ -147,7 +137,6 @@ function DJCardView({ dj }: { dj: DJCard }) {
 
 function VenueCardView({ venue }: { venue: VenueCard }) {
   const navigate = useNavigate()
-  const displayName = venue.venue_name
 
   return (
     <div
@@ -155,15 +144,7 @@ function VenueCardView({ venue }: { venue: VenueCard }) {
       onClick={() => navigate(`/venue/${venue.id}`)}
     >
       <div className="h-48 overflow-hidden flex-shrink-0">
-        {venue.photo_url ? (
-          <img
-            src={venue.photo_url}
-            alt={displayName}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <PhotoPlaceholder name={displayName} />
-        )}
+        <PhotoPlaceholder name={venue.name} />
       </div>
 
       <div className="p-4 flex flex-col gap-2 flex-1">
@@ -171,7 +152,7 @@ function VenueCardView({ venue }: { venue: VenueCard }) {
           className="text-white font-bold text-lg leading-tight"
           style={{ fontFamily: 'Space Grotesk, sans-serif' }}
         >
-          {displayName}
+          {venue.name}
         </h3>
 
         {venue.city && (
@@ -181,9 +162,9 @@ function VenueCardView({ venue }: { venue: VenueCard }) {
           </div>
         )}
 
-        {venue.genres?.length > 0 && (
+        {venue.preferred_genres?.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {venue.genres.slice(0, 3).map((g) => (
+            {venue.preferred_genres.slice(0, 3).map((g) => (
               <span
                 key={g}
                 className="text-xs px-2 py-0.5 rounded-full border text-[#FF2D78]"
@@ -233,10 +214,10 @@ export default function DiscoverPage() {
       const [djRes, venueRes] = await Promise.all([
         supabase
           .from('dj_profiles')
-          .select('id, name, city, genres, bpm_min, bpm_max, booking_count, photo_url'),
+          .select('id, name, city, genre, bpm_min, bpm_max, booking_count'),
         supabase
           .from('venue_profiles')
-          .select('id, venue_name, city, capacity, genres, photo_url'),
+          .select('id, name, city, capacity, preferred_genres'),
       ])
 
       if (djRes.data) setDjs(djRes.data as DJCard[])
@@ -251,7 +232,7 @@ export default function DiscoverPage() {
   const filteredDjs = useMemo(() => {
     return djs.filter((dj) => {
       if (cityFilter && !dj.city?.toLowerCase().includes(cityFilter.toLowerCase())) return false
-      if (genreFilter && !dj.genres?.some((g) => g.toLowerCase() === genreFilter.toLowerCase())) return false
+      if (genreFilter && !dj.genre?.some((g) => g.toLowerCase() === genreFilter.toLowerCase())) return false
       if (dj.bpm_min != null && dj.bpm_max != null) {
         if (dj.bpm_max < bpmRange[0] || dj.bpm_min > bpmRange[1]) return false
       }
@@ -262,7 +243,7 @@ export default function DiscoverPage() {
   const filteredVenues = useMemo(() => {
     return venues.filter((venue) => {
       if (cityFilter && !venue.city?.toLowerCase().includes(cityFilter.toLowerCase())) return false
-      if (genreFilter && !venue.genres?.some((g) => g.toLowerCase() === genreFilter.toLowerCase())) return false
+      if (genreFilter && !venue.preferred_genres?.some((g) => g.toLowerCase() === genreFilter.toLowerCase())) return false
       return true
     })
   }, [venues, cityFilter, genreFilter])
