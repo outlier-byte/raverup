@@ -51,6 +51,8 @@ export default function OnboardingPage() {
       return
     }
 
+    console.log('[OnboardingPage] user.id before insert:', user.id ?? 'NULL')
+
     if (userType === 'dj') {
       const { error: djError } = await supabase
         .from('dj_profiles')
