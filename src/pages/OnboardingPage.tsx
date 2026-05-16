@@ -56,7 +56,7 @@ export default function OnboardingPage() {
     if (userType === 'dj') {
       const { error: djError } = await supabase
         .from('dj_profiles')
-        .insert({ user_id: user.id, stage_name: stageName, city: djCity, genre: genres })
+        .insert({ user_id: user.id, name: stageName, city: djCity, genre: genres })
 
       if (djError) {
         setError(djError.message)
