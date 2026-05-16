@@ -185,7 +185,10 @@ export default function DJProfilePage() {
 
                 {profile.genre && (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
-                    {profile.genre.split(',').map((g) => (
+                    {(Array.isArray(profile.genre)
+                      ? profile.genre
+                      : profile.genre.split(',')
+                    ).map((g) => (
                       <span
                         key={g.trim()}
                         style={{
