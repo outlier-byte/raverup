@@ -145,6 +145,10 @@ export default function BookingPage() {
   }
 
   async function handleSubmit() {
+    console.log('booking submit başladı')
+    console.log('venue_id:', venueId)
+    console.log('dj_id:', djId)
+
     if (!venueId || !djId || !eventDate) return
 
     setSubmitting(true)
