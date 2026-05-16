@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 interface DJProfile {
+  id: string
   name: string
   city: string
 }
 
 interface VenueProfile {
+  id: string
   name: string
   city: string
   capacity: number
@@ -17,6 +19,14 @@ interface Stats {
   total: number
   completed: number
   third: number
+}
+
+interface Booking {
+  id: string
+  event_date: string
+  status: 'pending' | 'accepted' | 'declined'
+  initiated_by: 'dj' | 'venue'
+  venue_id: string
 }
 
 export default function DashboardPage() {
@@ -58,7 +68,7 @@ export default function DashboardPage() {
       if (type === 'dj') {
         const { data, error: djError } = await supabase
           .from('dj_profiles')
-          .select('name, city')
+          .select('id, name, city')
           .eq('user_id', user.id)
           .single()
 
@@ -67,7 +77,7 @@ export default function DashboardPage() {
       } else if (type === 'venue') {
         const { data, error: venueError } = await supabase
           .from('venue_profiles')
-          .select('name, city, capacity')
+          .select('id, name, city, capacity')
           .eq('user_id', user.id)
           .single()
 
@@ -140,14 +150,14 @@ export default function DashboardPage() {
   if (profileType === 'dj') {
     return (
       <Shell onSignOut={handleSignOut}>
-        <DJDashboard userId={userId!} profile={djProfile} stats={stats} />
+        <DJDashboard userId={userId!} profile={djProfile} stats={stats} djProfileId={djProfile?.id ?? null} />
       </Shell>
     )
   }
 
   return (
     <Shell onSignOut={handleSignOut}>
-      <VenueDashboard userId={userId!} profile={venueProfile} stats={stats} />
+      <VenueDashboard userId={userId!} profile={venueProfile} stats={stats} venueProfileId={venueProfile?.id ?? null} />
     </Shell>
   )
 }
@@ -233,15 +243,85 @@ function EmptyState({ message }: { message: string }) {
   )
 }
 
+function StatusBadge({ status }: { status: Booking['status'] }) {
+  const map = {
+    pending: { label: 'Beklemede', color: '#F59E0B' },
+    accepted: { label: 'Kabul Edildi', color: '#00d4aa' },
+    declined: { label: 'Reddedildi', color: '#EF4444' },
+  }
+  const { label, color } = map[status]
+  return (
+    <span
+      style={{
+        color,
+        background: `${color}18`,
+        border: `1px solid ${color}40`,
+        fontFamily: 'Inter, sans-serif',
+      }}
+      className="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium"
+    >
+      {label}
+    </span>
+  )
+}
+
+function BookingRow({ booking }: { booking: Booking }) {
+  const date = new Date(booking.event_date).toLocaleDateString('tr-TR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+  const origin = booking.initiated_by === 'venue' ? 'Venue\'dan teklif' : 'Kendi teklifin'
+
+  return (
+    <div
+      style={{ background: '#0d0d0d', border: '1px solid #1f1f1f' }}
+      className="rounded-xl px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+    >
+      <div className="flex flex-col gap-0.5">
+        <span style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#fff' }} className="text-sm font-medium">
+          {date}
+        </span>
+        <span style={{ fontFamily: 'Inter, sans-serif', color: '#ffffff50' }} className="text-xs">
+          {origin}
+        </span>
+      </div>
+      <StatusBadge status={booking.status} />
+    </div>
+  )
+}
+
 function DJDashboard({
   userId,
   profile,
   stats,
+  djProfileId,
 }: {
   userId: string
   profile: DJProfile | null
   stats: Stats
+  djProfileId: string | null
 }) {
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [bookingsLoading, setBookingsLoading] = useState(true)
+
+  useEffect(() => {
+    if (!djProfileId) { setBookingsLoading(false); return }
+
+    async function fetchBookings() {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('id, event_date, status, initiated_by, venue_id')
+        .eq('dj_id', djProfileId)
+        .order('created_at', { ascending: false })
+
+      if (!error && data) setBookings(data as Booking[])
+      setBookingsLoading(false)
+    }
+
+    fetchBookings()
+  }, [djProfileId])
+
   return (
     <div className="flex flex-col gap-8">
       {/* Header */}
@@ -282,7 +362,20 @@ function DJDashboard({
       {/* Booking offers */}
       <div>
         <SectionHeader title="Booking Teklifleri" />
-        <EmptyState message="Henüz teklif yok." />
+        {bookingsLoading ? (
+          <div className="flex justify-center py-8">
+            <div
+              style={{ width: 24, height: 24, border: '2px solid #1f1f1f', borderTopColor: '#FF2D78', borderRadius: '50%' }}
+              className="animate-spin"
+            />
+          </div>
+        ) : bookings.length === 0 ? (
+          <EmptyState message="Henüz teklif yok." />
+        ) : (
+          <div className="flex flex-col gap-2">
+            {bookings.map(b => <BookingRow key={b.id} booking={b} />)}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -292,11 +385,33 @@ function VenueDashboard({
   userId,
   profile,
   stats,
+  venueProfileId,
 }: {
   userId: string
   profile: VenueProfile | null
   stats: Stats
+  venueProfileId: string | null
 }) {
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [bookingsLoading, setBookingsLoading] = useState(true)
+
+  useEffect(() => {
+    if (!venueProfileId) { setBookingsLoading(false); return }
+
+    async function fetchBookings() {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('id, event_date, status, initiated_by, venue_id')
+        .eq('venue_id', venueProfileId)
+        .order('created_at', { ascending: false })
+
+      if (!error && data) setBookings(data as Booking[])
+      setBookingsLoading(false)
+    }
+
+    fetchBookings()
+  }, [venueProfileId])
+
   return (
     <div className="flex flex-col gap-8">
       {/* Header */}
@@ -338,7 +453,20 @@ function VenueDashboard({
       {/* Booking offers */}
       <div>
         <SectionHeader title="Booking Teklifleri" />
-        <EmptyState message="Henüz teklif yok." />
+        {bookingsLoading ? (
+          <div className="flex justify-center py-8">
+            <div
+              style={{ width: 24, height: 24, border: '2px solid #1f1f1f', borderTopColor: '#FF2D78', borderRadius: '50%' }}
+              className="animate-spin"
+            />
+          </div>
+        ) : bookings.length === 0 ? (
+          <EmptyState message="Henüz teklif yok." />
+        ) : (
+          <div className="flex flex-col gap-2">
+            {bookings.map(b => <BookingRow key={b.id} booking={b} />)}
+          </div>
+        )}
       </div>
     </div>
   )
