@@ -39,7 +39,7 @@ export default function DashboardPage() {
         .from('profiles')
         .select('type')
         .eq('id', user!.id)
-        .single()
+        .maybeSingle()
 
       if (profileError) {
         setError(profileError.message)
