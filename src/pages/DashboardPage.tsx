@@ -41,13 +41,17 @@ export default function DashboardPage() {
         .eq('id', user!.id)
         .maybeSingle()
 
+      console.log('dashboard profile data:', profile)
+      console.log('dashboard profile error:', profileError)
+
       if (profileError) {
         setError(profileError.message)
         setLoading(false)
         return
       }
 
-      const type = profile?.type as 'dj' | 'venue' | null
+      const raw = Array.isArray(profile) ? profile[0] : profile
+      const type = raw?.type as 'dj' | 'venue' | null
       setProfileType(type)
 
       if (type === 'dj') {
