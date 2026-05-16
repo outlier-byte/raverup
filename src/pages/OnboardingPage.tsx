@@ -40,11 +40,10 @@ export default function OnboardingPage() {
     setLoading(true)
     setError(null)
 
-    console.log('profiles update:', { user_id: user.id, type: userType })
+    console.log('profiles upsert:', { user_id: user.id, type: userType })
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
-      .update({ type: userType })
-      .eq('user_id', user.id)
+      .upsert({ user_id: user.id, type: userType }, { onConflict: 'user_id' })
       .select()
     console.log('profiles result:', profileData, profileError)
 
@@ -56,10 +55,10 @@ export default function OnboardingPage() {
 
     if (userType === 'dj') {
       const djPayload = { user_id: user.id, name: stageName, city: djCity, genre: genres }
-      console.log('dj insert:', djPayload)
+      console.log('dj upsert:', djPayload)
       const { data: djData, error: djError } = await supabase
         .from('dj_profiles')
-        .insert(djPayload)
+        .upsert(djPayload, { onConflict: 'user_id' })
         .select()
       console.log('dj result:', djData, djError)
 
@@ -70,10 +69,10 @@ export default function OnboardingPage() {
       }
     } else {
       const venuePayload = { user_id: user.id, name: venueName, city: venueCity, capacity: Number(capacity) }
-      console.log('venue insert:', venuePayload)
+      console.log('venue upsert:', venuePayload)
       const { data: venueData, error: venueError } = await supabase
         .from('venue_profiles')
-        .insert(venuePayload)
+        .upsert(venuePayload, { onConflict: 'user_id' })
         .select()
       console.log('venue result:', venueData, venueError)
 
