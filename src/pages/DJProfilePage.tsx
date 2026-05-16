@@ -16,19 +16,19 @@ interface DJProfile {
   id: string
   user_id: string
   name: string
-  city: string
-  genres: string[]
   bio: string | null
+  genre: string | null
   bpm_min: number | null
   bpm_max: number | null
-  photo_url: string | null
-  mix_soundcloud: string | null
-  mix_mixcloud: string | null
-  rider_notes: string | null
+  city: string
+  country: string | null
+  mix_url: string | null
+  soundcloud: string | null
   instagram: string | null
-  completion_rate: number | null
-  response_time_hours: number | null
+  rider_notes: string | null
   booking_count: number | null
+  reliability_score: number | null
+  avg_response_hours: number | null
 }
 
 function Avatar({ url, name }: { url: string | null; name: string }) {
@@ -96,7 +96,7 @@ export default function DJProfilePage() {
       const { data, error: fetchError } = await supabase
         .from('dj_profiles')
         .select(
-          'id, user_id, name, city, genres, bio, bpm_min, bpm_max, photo_url, mix_soundcloud, mix_mixcloud, rider_notes, instagram, completion_rate, response_time_hours, booking_count'
+          'id, user_id, name, bio, genre, bpm_min, bpm_max, city, country, mix_url, soundcloud, instagram, rider_notes, booking_count, reliability_score, avg_response_hours'
         )
         .eq('id', id)
         .single()
@@ -136,8 +136,8 @@ export default function DJProfilePage() {
   }
 
   const hasBpm = profile.bpm_min != null || profile.bpm_max != null
-  const hasMix = profile.mix_soundcloud || profile.mix_mixcloud
-  const hasTrustSignals = profile.completion_rate != null || profile.response_time_hours != null || profile.booking_count != null
+  const hasMix = profile.soundcloud || profile.mix_url
+  const hasTrustSignals = profile.reliability_score != null || profile.avg_response_hours != null || profile.booking_count != null
 
   return (
     <div style={{ minHeight: '100vh', background: '#050505', fontFamily: 'Inter, sans-serif' }}>
@@ -177,28 +177,27 @@ export default function DJProfilePage() {
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>
                   <MapPin size={14} color="#888" />
-                  <span style={{ color: '#888', fontSize: 14 }}>{profile.city}</span>
+                  <span style={{ color: '#888', fontSize: 14 }}>
+                    {profile.city}{profile.country ? `, ${profile.country}` : ''}
+                  </span>
                 </div>
 
-                {profile.genres && profile.genres.length > 0 && (
+                {profile.genre && (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
-                    {profile.genres.map((g) => (
-                      <span
-                        key={g}
-                        style={{
-                          fontSize: 11,
-                          fontWeight: 600,
-                          color: '#FF2D78',
-                          border: '1px solid #FF2D78',
-                          borderRadius: 4,
-                          padding: '3px 8px',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
-                        }}
-                      >
-                        {g}
-                      </span>
-                    ))}
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: '#FF2D78',
+                        border: '1px solid #FF2D78',
+                        borderRadius: 4,
+                        padding: '3px 8px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      {profile.genre}
+                    </span>
                   </div>
                 )}
 
@@ -237,7 +236,7 @@ export default function DJProfilePage() {
               </div>
 
               {/* Right: avatar */}
-              <Avatar url={profile.photo_url} name={profile.name} />
+              <Avatar url={null} name={profile.name} />
             </div>
 
             {/* Trust signals row */}
@@ -251,17 +250,17 @@ export default function DJProfilePage() {
                   borderTop: '1px solid #1f1f1f',
                 }}
               >
-                {profile.completion_rate != null && (
+                {profile.reliability_score != null && (
                   <TrustSignal
                     icon={<CheckCircle size={14} color="#00d4aa" />}
-                    value={`%${profile.completion_rate}`}
-                    label="tamamlanma oranı"
+                    value={`${profile.reliability_score}`}
+                    label="güvenilirlik skoru"
                   />
                 )}
-                {profile.response_time_hours != null && (
+                {profile.avg_response_hours != null && (
                   <TrustSignal
                     icon={<Clock size={14} color="#00d4aa" />}
-                    value={`${profile.response_time_hours}s içinde`}
+                    value={`${profile.avg_response_hours}s içinde`}
                     label="ortalama yanıt"
                   />
                 )}
@@ -311,9 +310,9 @@ export default function DJProfilePage() {
               Mixler
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {profile.mix_soundcloud && (
+              {profile.soundcloud && (
                 <a
-                  href={profile.mix_soundcloud}
+                  href={profile.soundcloud}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -330,7 +329,6 @@ export default function DJProfilePage() {
                     cursor: 'pointer',
                   }}
                 >
-                  {/* SoundCloud icon */}
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path
                       d="M1 17.5A2.5 2.5 0 003.5 20H18a4 4 0 000-8 5 5 0 00-9.9-1A2.5 2.5 0 001 13.5v4z"
@@ -343,9 +341,9 @@ export default function DJProfilePage() {
                   <ExternalLink size={13} color="#555" style={{ marginLeft: 'auto' }} />
                 </a>
               )}
-              {profile.mix_mixcloud && (
+              {profile.mix_url && (
                 <a
-                  href={profile.mix_mixcloud}
+                  href={profile.mix_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -362,16 +360,8 @@ export default function DJProfilePage() {
                     cursor: 'pointer',
                   }}
                 >
-                  {/* Mixcloud icon */}
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path
-                      d="M3 12a9 9 0 1118 0 9 9 0 01-18 0z"
-                      stroke="#5000FF"
-                      strokeWidth="1.5"
-                    />
-                    <path d="M9 15V9l7 3-7 3z" fill="#5000FF" />
-                  </svg>
-                  <span>Mixcloud</span>
+                  <ExternalLink size={18} color="#aaa" />
+                  <span>Mix</span>
                   <ExternalLink size={13} color="#555" style={{ marginLeft: 'auto' }} />
                 </a>
               )}
