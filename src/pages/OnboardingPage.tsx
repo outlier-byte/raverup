@@ -289,7 +289,7 @@ function Step2({
           <>
             <Field
               label="Sahne adı"
-              id="stage_name"
+              id="name"
               value={stageName}
               onChange={setStageName}
               placeholder="örn. DJ Shadow"

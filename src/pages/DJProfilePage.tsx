@@ -15,7 +15,7 @@ import { supabase } from '../lib/supabase'
 interface DJProfile {
   id: string
   user_id: string
-  stage_name: string
+  name: string
   city: string
   genres: string[]
   bio: string | null
@@ -96,7 +96,7 @@ export default function DJProfilePage() {
       const { data, error: fetchError } = await supabase
         .from('dj_profiles')
         .select(
-          'id, user_id, stage_name, city, genres, bio, bpm_min, bpm_max, photo_url, mix_soundcloud, mix_mixcloud, rider_notes, instagram, completion_rate, response_time_hours, booking_count'
+          'id, user_id, name, city, genres, bio, bpm_min, bpm_max, photo_url, mix_soundcloud, mix_mixcloud, rider_notes, instagram, completion_rate, response_time_hours, booking_count'
         )
         .eq('id', id)
         .single()
@@ -172,7 +172,7 @@ export default function DJProfilePage() {
                     lineHeight: 1.1,
                   }}
                 >
-                  {profile.stage_name}
+                  {profile.name}
                 </h1>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>
@@ -237,7 +237,7 @@ export default function DJProfilePage() {
               </div>
 
               {/* Right: avatar */}
-              <Avatar url={profile.photo_url} name={profile.stage_name} />
+              <Avatar url={profile.photo_url} name={profile.name} />
             </div>
 
             {/* Trust signals row */}

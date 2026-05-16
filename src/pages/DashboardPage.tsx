@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 interface DJProfile {
-  stage_name: string
+  name: string
   city: string
 }
 
@@ -58,7 +58,7 @@ export default function DashboardPage() {
       if (type === 'dj') {
         const { data, error: djError } = await supabase
           .from('dj_profiles')
-          .select('stage_name, city')
+          .select('name, city')
           .eq('user_id', user.id)
           .single()
 
@@ -254,7 +254,7 @@ function DJDashboard({
             style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#fff' }}
             className="text-3xl font-bold"
           >
-            {profile?.stage_name ?? '—'}
+            {profile?.name ?? '—'}
           </h1>
           {profile?.city && (
             <p style={{ fontFamily: 'Inter, sans-serif', color: '#ffffff50' }} className="text-sm mt-1">
