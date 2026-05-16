@@ -9,7 +9,6 @@ import {
   ExternalLink,
   ChevronDown,
   ChevronUp,
-  Instagram,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
@@ -450,7 +449,7 @@ export default function DJProfilePage() {
                 cursor: 'pointer',
               }}
             >
-              <Instagram size={16} color="#E1306C" />
+              <ExternalLink size={16} />
               <span>@{profile.instagram.replace(/^@/, '')}</span>
               <ExternalLink size={13} color="#555" />
             </a>
