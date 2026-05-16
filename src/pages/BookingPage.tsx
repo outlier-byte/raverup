@@ -119,6 +119,9 @@ export default function BookingPage() {
           .maybeSingle(),
       ])
 
+      const venueData = venueRes.data
+      console.log('venue data:', venueData)
+
       if (djRes.error || !djRes.data) {
         setInitError('DJ bulunamadı.')
         setInitLoading(false)
@@ -132,7 +135,7 @@ export default function BookingPage() {
       // }
 
       setDjName(djRes.data.name)
-      setVenueId(venueRes.data?.id ?? null)
+      setVenueId(venueData?.id ?? null)
       setInitLoading(false)
     }
 
