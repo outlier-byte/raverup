@@ -119,20 +119,11 @@ export default function BookingPage() {
           .maybeSingle(),
       ])
 
-      const venueData = venueRes.data
-      console.log('venue data:', venueData)
-
       if (djRes.error || !djRes.data) {
         setInitError('DJ bulunamadı.')
         setInitLoading(false)
         return
       }
-
-      // if (!venueRes.data) {
-      //   setInitError('Bu sayfaya sadece venue hesapları erişebilir.')
-      //   setInitLoading(false)
-      //   return
-      // }
 
       setDjName(djRes.data.name)
       setVenueId(venueData?.id ?? null)
@@ -148,10 +139,6 @@ export default function BookingPage() {
   }
 
   async function handleSubmit() {
-    console.log('booking submit başladı')
-    console.log('venue_id:', venueId)
-    console.log('dj_id:', djId)
-
     if (!venueId || !djId || !eventDate) return
 
     setSubmitting(true)

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
+import Navbar from './components/Navbar'
 import HomePage from './pages/HomePage'
 import AuthPage from './pages/AuthPage'
 import DiscoverPage from './pages/DiscoverPage'
@@ -24,6 +25,8 @@ function GuestRoute({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <Navbar />
+      <div style={{ paddingTop: 56 }}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/auth" element={<GuestRoute><AuthPage /></GuestRoute>} />
@@ -34,6 +37,7 @@ export default function App() {
         <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
         <Route path="/booking/:djId" element={<ProtectedRoute><BookingPage /></ProtectedRoute>} />
       </Routes>
+      </div>
     </BrowserRouter>
   )
 }
