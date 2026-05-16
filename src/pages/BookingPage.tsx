@@ -126,7 +126,7 @@ export default function BookingPage() {
       }
 
       setDjName(djRes.data.name)
-      setVenueId(venueData?.id ?? null)
+      setVenueId(venueRes.data?.id ?? null)
       setInitLoading(false)
     }
 
