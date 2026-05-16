@@ -1,3 +1,5 @@
+@.claude/knowledge.md
+
 # RaverUp — CLAUDE.md
 
 Her Claude Code session'ında bu dosyayı oku. Proje bağlamı ve davranış kuralları burada.
