@@ -106,12 +106,17 @@ export default function BookingPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { navigate('/auth', { replace: true }); return }
 
-      const [djRes, venueRes] = await Promise.all([
+      const [djRes, userDjRes, venueRes] = await Promise.all([
         supabase
           .from('dj_profiles')
           .select('name')
           .eq('id', djId)
           .single(),
+        supabase
+          .from('dj_profiles')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle(),
         supabase
           .from('venue_profiles')
           .select('id')
@@ -121,6 +126,12 @@ export default function BookingPage() {
 
       if (djRes.error || !djRes.data) {
         setInitError('DJ bulunamadı.')
+        setInitLoading(false)
+        return
+      }
+
+      if (userDjRes.data?.id === djId) {
+        setInitError('Kendi profilinize teklif gönderemezsiniz.')
         setInitLoading(false)
         return
       }
@@ -182,10 +193,10 @@ export default function BookingPage() {
       <div style={{ minHeight: '100vh', background: '#050505', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
         <p style={{ color: '#888', fontFamily: 'Inter, sans-serif', textAlign: 'center', padding: '0 24px' }}>{initError}</p>
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/discover')}
           style={{ color: '#FF2D78', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 14 }}
         >
-          ← Geri dön
+          ← Discover'a dön
         </button>
       </div>
     )
