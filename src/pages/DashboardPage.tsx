@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 interface DJProfile {
@@ -21,9 +20,7 @@ interface Stats {
 }
 
 export default function DashboardPage() {
-  const { user, signOut } = useAuth()
-  const navigate = useNavigate()
-
+  const [userId, setUserId] = useState<string | null>(null)
   const [profileType, setProfileType] = useState<'dj' | 'venue' | null>(null)
   const [djProfile, setDjProfile] = useState<DJProfile | null>(null)
   const [venueProfile, setVenueProfile] = useState<VenueProfile | null>(null)
@@ -32,25 +29,20 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!user) return
+    async function loadProfile() {
+      const { data: { user } } = await supabase.auth.getUser()
+      console.log('user:', user?.id)
 
-    async function fetchProfile() {
-      const { data: { session } } = await supabase.auth.getSession()
-      console.log('dashboard session:', session?.user?.id)
-
-      if (!session) {
-        setLoading(false)
-        return
-      }
+      if (!user) { window.location.href = '/auth'; return }
+      setUserId(user.id)
 
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('type')
-        .eq('id', session.user.id)
+        .eq('user_id', user.id)
         .maybeSingle()
 
-      console.log('dashboard profile data:', profile)
-      console.log('dashboard profile error:', profileError)
+      console.log('profile:', profile, 'error:', profileError)
 
       if (profileError) {
         setError(profileError.message)
@@ -58,15 +50,16 @@ export default function DashboardPage() {
         return
       }
 
-      const raw = Array.isArray(profile) ? profile[0] : profile
-      const type = raw?.type as 'dj' | 'venue' | null
+      if (!profile) { window.location.href = '/onboarding'; return }
+
+      const type = profile.type as 'dj' | 'venue'
       setProfileType(type)
 
       if (type === 'dj') {
         const { data, error: djError } = await supabase
           .from('dj_profiles')
           .select('stage_name, city')
-          .eq('user_id', session.user.id)
+          .eq('user_id', user.id)
           .single()
 
         if (djError) setError(djError.message)
@@ -75,7 +68,7 @@ export default function DashboardPage() {
         const { data, error: venueError } = await supabase
           .from('venue_profiles')
           .select('name, city, capacity')
-          .eq('user_id', session.user.id)
+          .eq('user_id', user.id)
           .single()
 
         if (venueError) setError(venueError.message)
@@ -85,12 +78,12 @@ export default function DashboardPage() {
       setLoading(false)
     }
 
-    fetchProfile()
-  }, [user])
+    loadProfile()
+  }, [])
 
   async function handleSignOut() {
-    await signOut()
-    navigate('/auth', { replace: true })
+    await supabase.auth.signOut()
+    window.location.href = '/auth'
   }
 
   if (loading) {
@@ -147,14 +140,14 @@ export default function DashboardPage() {
   if (profileType === 'dj') {
     return (
       <Shell onSignOut={handleSignOut}>
-        <DJDashboard userId={user!.id} profile={djProfile} stats={stats} />
+        <DJDashboard userId={userId!} profile={djProfile} stats={stats} />
       </Shell>
     )
   }
 
   return (
     <Shell onSignOut={handleSignOut}>
-      <VenueDashboard userId={user!.id} profile={venueProfile} stats={stats} />
+      <VenueDashboard userId={userId!} profile={venueProfile} stats={stats} />
     </Shell>
   )
 }
