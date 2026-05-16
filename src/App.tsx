@@ -7,6 +7,7 @@ import DJProfilePage from './pages/DJProfilePage'
 import VenueProfilePage from './pages/VenueProfilePage'
 import DashboardPage from './pages/DashboardPage'
 import OnboardingPage from './pages/OnboardingPage'
+import BookingPage from './pages/BookingPage'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/venue/:id" element={<VenueProfilePage />} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
         <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
+        <Route path="/booking/:djId" element={<ProtectedRoute><BookingPage /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   )
