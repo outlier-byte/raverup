@@ -91,11 +91,6 @@ export default function DashboardPage() {
     loadProfile()
   }, [])
 
-  async function handleSignOut() {
-    await supabase.auth.signOut()
-    window.location.href = '/auth'
-  }
-
   if (loading) {
     return (
       <div
@@ -149,47 +144,22 @@ export default function DashboardPage() {
 
   if (profileType === 'dj') {
     return (
-      <Shell onSignOut={handleSignOut}>
+      <Shell>
         <DJDashboard userId={userId!} profile={djProfile} stats={stats} djProfileId={djProfile?.id ?? null} />
       </Shell>
     )
   }
 
   return (
-    <Shell onSignOut={handleSignOut}>
+    <Shell>
       <VenueDashboard userId={userId!} profile={venueProfile} stats={stats} venueProfileId={venueProfile?.id ?? null} />
     </Shell>
   )
 }
 
-function Shell({
-  children,
-  onSignOut,
-}: {
-  children: React.ReactNode
-  onSignOut: () => void
-}) {
+function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ minHeight: '100svh', background: '#050505' }} className="flex flex-col">
-      <header
-        style={{ background: '#0d0d0d', borderBottom: '1px solid #1f1f1f' }}
-        className="px-4 sm:px-8 py-4 flex items-center justify-between"
-      >
-        <span
-          style={{ fontFamily: "'Space Grotesk', sans-serif", color: '#FF2D78' }}
-          className="text-lg font-bold tracking-tight"
-        >
-          RaverUp
-        </span>
-        <button
-          onClick={onSignOut}
-          style={{ border: '1px solid #1f1f1f', color: '#ffffff50', fontFamily: 'Inter, sans-serif' }}
-          className="rounded-lg px-4 py-1.5 text-xs cursor-pointer hover:border-white/30 transition"
-        >
-          Çıkış
-        </button>
-      </header>
-
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-8 py-10">
         {children}
       </main>
